@@ -5,7 +5,7 @@ import pickle
 
 def analyze_team_stats(team1, team2):
     # Read the IPL matches dataset
-    df = pd.read_csv('ipl-score-predictor\Datasets\ipl_matches.csv')
+    df = pd.read_csv('Datasets\ipl_matches.csv')
     
     # Filter matches between the two teams (considering both combinations)
     matches = df[

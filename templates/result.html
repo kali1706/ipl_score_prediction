@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IPL Score Prediction Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="result-container">
+        <div class="header">
+            <h2><i class="fas fa-cricket fa-sm me-2"></i>IPL SCORE PREDICTOR</h2>
+        </div>
+        
+        <div class="page-title">
+            <h1>Match Prediction Summary</h1>
+            <div class="title-underline"></div>
+        </div>
+        
+        <div class="match-details card-container">
+            <div class="section-header">
+                <h3>Head to Head Analysis</h3>
+                <div class="section-underline"></div>
+            </div>    
+            <div class="head-to-head-stats"> 
+                <div class="team-comparison"> 
+                    <div class="team-card"> 
+                        <img src="{{ batting_team_logo }}" alt="{{ batting_team }}" class="team-logo"> 
+                        <h4>{{ batting_team }}</h4> 
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-label">Wins</span>
+                                <span class="stat-value">{{ h2h_stats.team1_wins if h2h_stats and h2h_stats.team1_wins is defined else 0 }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Win Rate</span>
+                                <span class="stat-value">{{ h2h_stats.team1_win_percentage if h2h_stats and h2h_stats.team1_win_percentage is defined else 0 }}%</span>
+                            </div>
+                        </div>
+                    </div> 
+                    
+                    <div class="vs-container"> 
+                        <div class="vs-circle">VS</div>
+                        <div class="total-matches">
+                            Total Matches: {{ h2h_stats.total_matches if h2h_stats and h2h_stats.total_matches is defined else 0 }}
+                        </div>
+                    </div> 
+                    
+                    <div class="team-card"> 
+                        <img src="{{ bowling_team_logo }}" alt="{{ bowling_team }}" class="team-logo"> 
+                        <h4>{{ bowling_team }}</h4> 
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-label">Wins</span>
+                                <span class="stat-value">{{ h2h_stats.team2_wins if h2h_stats and h2h_stats.team2_wins is defined else 0 }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Win Rate</span>
+                                <span class="stat-value">{{ h2h_stats.team2_win_percentage if h2h_stats and h2h_stats.team2_win_percentage is defined else 0 }}%</span>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        </div>
+        <div class="current-score card-container">
+            <div class="section-header">
+                <h3>Current Score</h3>
+                <div class="section-underline"></div>
+            </div>
+            <div class="score-details">
+                <div class="score-item">
+                    <div class="score-icon"><i class="fas fa-chart-line"></i></div>
+                    <p>Score</p>
+                    <div class="score-value">{{ current_score }}</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-icon"><i class="fas fa-times-circle"></i></div>
+                    <p>Wickets</p>
+                    <div class="score-value">{{ wickets }}</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-icon"><i class="far fa-clock"></i></div>
+                    <p>Overs</p>
+                    <div class="score-value">{{ overs }}</div>
+                </div>
+                {% if target %}
+                <div class="score-item target-item">
+                    <div class="score-icon"><i class="fas fa-bullseye"></i></div>
+                    <p>Target</p>
+                    <div class="score-value">{{ target }}</div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Run Rate Information -->
+            <div class="run-rate-info mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="rate-card">
+                            <h5>Current Run Rate</h5>
+                            <div class="rate-value">{{ (current_score / overs)|round(2) }}</div>
+                        </div>
+                    </div>
+                    {% if target %}
+                    <div class="col-md-6">
+                        <div class="rate-card required">
+                            <h5>Required Run Rate</h5>
+                            <div class="rate-value">
+                                {% set balls_remaining = (20 - overs) * 6 %}
+                                {% set runs_remaining = target - current_score %}
+                                {% if balls_remaining > 0 %}
+                                    {{ ((runs_remaining * 6) / balls_remaining)|round(2) }}
+                                {% else %}
+                                    0.00
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="prediction card-container">
+            <div class="section-header">
+                <h3>Prediction</h3>
+                <div class="section-underline"></div>
+            </div>
+            <div class="predicted-score-container">
+                <div class="predicted-score">
+                    <span class="prediction-label">Predicted Score:</span> 
+                    <span class="prediction-value">{{ prediction }}</span>
+                </div>
+                <div class="prediction-range">
+                    Range: {{ (prediction * 0.9)|int }} - {{ (prediction * 1.1)|int }}
+                </div>
+            </div>
+            
+            {% if win_probability is defined %}
+            <div class="section-header mt-5">
+                <h4>Win Probability</h4>
+                <div class="section-underline small"></div>
+            </div>
+            <div class="win-probability-container mt-4">
+                <div class="team-logos">
+                    <div class="team-logo-small">
+                        <img src="{{ url_for('static', filename='images/teams/' + batting_team.lower().replace(' ', '-') + '.jpg') }}" alt="{{ batting_team }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/ipl-logo.png') }}';">
+                    </div>
+                    <div class="team-logo-small">
+                        <img src="{{ url_for('static', filename='images/teams/' + bowling_team.lower().replace(' ', '-') + '.jpg') }}" alt="{{ bowling_team }}" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/ipl-logo.png') }}';">
+                    </div>
+                </div>
+                <div class="progress win-progress">
+                    {% set win_prob = win_probability|float %}
+                    {% set loss_prob = 100 - win_prob %}
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ win_prob }}%;" aria-valuenow="{{ win_prob }}" aria-valuemin="0" aria-valuemax="100">{{ win_prob|round(1) }}%</div>
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ loss_prob }}%;" aria-valuenow="{{ loss_prob }}" aria-valuemin="0" aria-valuemax="100">{{ loss_prob|round(1) }}%</div>
+                </div>
+                <div class="team-names">
+                    <div class="team-name-small">{{ batting_team }}</div>
+                    <div class="team-name-small">{{ bowling_team }}</div>
+                </div>
+            </div>
+            {% elif win is defined %}
+            <div class="section-header mt-5">
+                <h4>Win Probability</h4>
+                <div class="section-underline small"></div>
+            </div>
+            <div class="win-probability-container mt-4">
+                <div class="team-logos">
+                    <div class="team-logo-small">
+                        <img src="{{ batting_team_logo }}" alt="{{ batting_team }}" class="team-logo">
+                    </div>
+                    <div class="team-logo-small">
+                        <img src="{{ bowling_team_logo }}" alt="{{ bowling_team }}" class="team-logo">
+                    </div>
+                </div>
+                <div class="progress win-progress">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ loss }}%;" aria-valuenow="{{ loss }}" aria-valuemin="0" aria-valuemax="100">{{ loss }}%</div>
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ win }}%;" aria-valuenow="{{ win }}" aria-valuemin="0" aria-valuemax="100">{{ win }}%</div>
+                </div>
+                <div class="team-names">
+                    <div class="team-name-small">{{ batting_team }}</div>
+                    <div class="team-name-small">{{ bowling_team }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="text-center action-buttons">
+            <a href="{{ url_for('home') }}" class="btn btn-primary"><i class="fas fa-redo me-2"></i>Make Another Prediction</a>
+            <a href="#" class="btn btn-outline-light ms-3" onclick="window.print()"><i class="fas fa-print me-2"></i>Print Report</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation classes to elements
+            const elements = document.querySelectorAll('.team-box, .h2h-stat, .score-item, .predicted-score');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('animated');
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

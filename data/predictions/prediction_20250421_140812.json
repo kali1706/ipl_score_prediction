@@ -1,0 +1,38 @@
+{
+    "predicted_score": 2406,
+    "lower_bound": 2165,
+    "upper_bound": 2646,
+    "batting_team": "Kolkata Knight Riders",
+    "bowling_team": "Royal Challengers Bangalore",
+    "current_score": 143,
+    "wickets": 3,
+    "overs": 1.3,
+    "current_run_rate": 95.33,
+    "batting_stats": {
+        "matches": 20,
+        "wins": 0,
+        "losses": 20,
+        "win_percentage": 0.0,
+        "recent_form": 0
+    },
+    "bowling_stats": {
+        "matches": 20,
+        "wins": 20,
+        "losses": 0,
+        "win_percentage": 100.0,
+        "recent_form": 5
+    },
+    "h2h_stats": {
+        "total_matches": 10,
+        "team1_wins": 0,
+        "team2_wins": 10,
+        "team1_win_percentage": 0.0,
+        "team2_win_percentage": 100.0,
+        "team1_name": "Kolkata Knight Riders",
+        "team2_name": "Royal Challengers Bangalore"
+    },
+    "target": 122,
+    "runs_left": -21,
+    "win_probability": 100,
+    "timestamp": "2025-04-21 14:08:12"
+}

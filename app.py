@@ -92,6 +92,9 @@ team_colors = {
 }
 
 # Create a directory to store prediction history
+# Ensure necessary directories exist
+os.makedirs('Datasets', exist_ok=True)
+os.makedirs('models', exist_ok=True)
 os.makedirs('data/predictions', exist_ok=True)
 
 @app.route('/')
@@ -104,8 +107,8 @@ def analyze_head_to_head(team1, team2):
     try:
         # Try to load the dataset
         try:
-            # Fix the path - use os.path.join for cross-platform compatibility
-            ipl_data = pd.read_csv(os.path.join('ipl-score-predictor', 'Datasets', 'ipl_matches.csv'))
+            # Fix the path - use forward slashes for cross-platform compatibility
+            ipl_data = pd.read_csv('Datasets/ipl_matches.csv')
         except FileNotFoundError:
             # Create dummy data if file doesn't exist
             print("Match data file not found. Creating dummy data for head-to-head analysis.")
@@ -120,8 +123,8 @@ def analyze_head_to_head(team1, team2):
                     'date': f"2024-{(i%12)+1:02d}-{(i%28)+1:02d}"
                 })
             ipl_data = pd.DataFrame(matches)
-            os.makedirs(os.path.join('ipl-score-predictor', 'Datasets'), exist_ok=True)
-            ipl_data.to_csv(os.path.join('ipl-score-predictor', 'Datasets', 'ipl_matches.csv'), index=False)
+            os.makedirs('Datasets', exist_ok=True)
+            ipl_data.to_csv('Datasets/ipl_matches.csv', index=False)
         
         # Filter matches between these two teams - simplify the filtering logic
         h2h_matches = ipl_data[
@@ -171,7 +174,7 @@ def get_team_stats(team1, team2):
     try:
         # Try to load the dataset
         try:
-            ipl_data = pd.read_csv('ipl-score-predictor\Datasets\ipl_matches.csv')
+            ipl_data = pd.read_csv('Datasets/ipl_matches.csv')
         except FileNotFoundError:
             # If file doesn't exist, create a dummy dataset for demonstration
             print("Match data file not found. Creating dummy data.")
@@ -189,8 +192,8 @@ def get_team_stats(team1, team2):
                 })
             ipl_data = pd.DataFrame(matches)
             # Save the dummy data for future use
-            os.makedirs('data', exist_ok=True)
-            ipl_data.to_csv('ipl-score-predictor\Datasets\ipl_matches.csv', index=False)
+            os.makedirs('Datasets', exist_ok=True)
+            ipl_data.to_csv('Datasets/ipl_matches.csv', index=False)
         
         # Get team1 stats
         team1_matches = ipl_data[(ipl_data['team1'] == team1) | (ipl_data['team2'] == team1)]
@@ -317,10 +320,11 @@ def get_last_five_overs_stats(team1, team2):
         
         # Calculate average runs and wickets in last 5 overs
         team1_last5_runs = team1_last5.groupby('match_id')['total_runs'].sum().mean()
-        team1_last5_wickets = team1_last5.groupby('match_id')['player_dismissed'].notna().sum().mean()
+        # Fix the notna issue by applying the function to the Series before groupby
+        team1_last5_wickets = team1_last5.groupby('match_id').apply(lambda x: x['player_dismissed'].notna().sum()).mean()
         
         team2_last5_runs = team2_last5.groupby('match_id')['total_runs'].sum().mean()
-        team2_last5_wickets = team2_last5.groupby('match_id')['player_dismissed'].notna().sum().mean()
+        team2_last5_wickets = team2_last5.groupby('match_id').apply(lambda x: x['player_dismissed'].notna().sum()).mean()
         
         # Handle NaN values
         team1_last5_runs = round(team1_last5_runs, 1) if not np.isnan(team1_last5_runs) else 45

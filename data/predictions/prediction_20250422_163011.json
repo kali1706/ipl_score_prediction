@@ -1,0 +1,40 @@
+{
+    "predicted_score": 152,
+    "lower_bound": 136,
+    "upper_bound": 166,
+    "batting_team": "Kolkata Knight Riders",
+    "bowling_team": "Gujarat Titans",
+    "current_score": 83,
+    "wickets": 3,
+    "overs": 12.3,
+    "current_run_rate": 6.64,
+    "batting_stats": {
+        "matches": 20,
+        "wins": 0,
+        "losses": 20,
+        "win_percentage": 0.0,
+        "recent_form": 0
+    },
+    "bowling_stats": {
+        "matches": 20,
+        "wins": 20,
+        "losses": 0,
+        "win_percentage": 100.0,
+        "recent_form": 5
+    },
+    "h2h_stats": {
+        "total_matches": 0,
+        "team1_wins": 0,
+        "team2_wins": 0,
+        "team1_win_percentage": 0,
+        "team2_win_percentage": 0,
+        "team1_name": "Kolkata Knight Riders",
+        "team2_name": "Gujarat Titans",
+        "last_5_matches": []
+    },
+    "target": 198,
+    "runs_left": 115,
+    "required_run_rate": 15.33,
+    "win_probability": 5,
+    "timestamp": "2025-04-22 16:30:11"
+}

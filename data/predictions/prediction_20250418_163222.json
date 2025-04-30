@@ -1,0 +1,37 @@
+{
+    "predicted_score": 207,
+    "lower_bound": 186,
+    "upper_bound": 227,
+    "batting_team": "Kolkata Knight Riders",
+    "bowling_team": "Sunrisers Hyderabad",
+    "current_score": 148,
+    "wickets": 2,
+    "overs": 15.4,
+    "current_run_rate": 9.45,
+    "batting_stats": {
+        "matches": 20,
+        "wins": 0,
+        "losses": 20,
+        "win_percentage": 0.0,
+        "recent_form": 0
+    },
+    "bowling_stats": {
+        "matches": 20,
+        "wins": 20,
+        "losses": 0,
+        "win_percentage": 100.0,
+        "recent_form": 5
+    },
+    "h2h_stats": {
+        "total_matches": 0,
+        "team1_wins": 0,
+        "team2_wins": 0,
+        "team1_win_percentage": 0,
+        "team2_win_percentage": 0
+    },
+    "target": 188,
+    "runs_left": 40,
+    "required_run_rate": 9.23,
+    "win_probability": 56.0,
+    "timestamp": "2025-04-18 16:32:22"
+}

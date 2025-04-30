@@ -1,0 +1,39 @@
+{
+    "predicted_score": 221,
+    "lower_bound": 199,
+    "upper_bound": 243,
+    "batting_team": "Kolkata Knight Riders",
+    "bowling_team": "Chennai Super Kings",
+    "current_score": 120,
+    "wickets": 2,
+    "overs": 11.5,
+    "current_run_rate": 10.14,
+    "batting_stats": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_percentage": 0,
+        "recent_form": 0
+    },
+    "bowling_stats": {
+        "matches": 0,
+        "wins": 0,
+        "losses": 0,
+        "win_percentage": 0,
+        "recent_form": 0
+    },
+    "h2h_stats": {
+        "total_matches": 0,
+        "team1_wins": 0,
+        "team2_wins": 0,
+        "team1_win_percentage": 0,
+        "team2_win_percentage": 0,
+        "team1_name": "Kolkata Knight Riders",
+        "team2_name": "Chennai Super Kings"
+    },
+    "target": 201,
+    "runs_left": 81,
+    "required_run_rate": 9.92,
+    "win_probability": 56.0,
+    "timestamp": "2025-04-21 19:02:33"
+}

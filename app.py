@@ -342,6 +342,137 @@ def get_last_five_overs_stats(team1, team2):
             'team2_last5_wickets': 1
         }
 
+# Add this function before the @app.route('/predict', methods=['POST']) line
+def save_prediction(prediction_data):
+    try:
+        # Create a unique filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"data/predictions/prediction_{timestamp}.json"
+        
+        # Add timestamp to the data
+        prediction_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Save to file
+        with open(filename, 'w') as f:
+            json.dump(prediction_data, f, indent=4)
+            
+        # Also save to CSV
+        save_to_csv(prediction_data)
+            
+        print(f"Prediction saved to {filename}")
+        return True
+    except Exception as e:
+        print(f"Error saving prediction: {e}")
+        return False
+# Function to save prediction history
+def save_prediction(prediction_data):
+    try:
+        # Create a unique filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"data/predictions/prediction_{timestamp}.json"
+        
+        # Add timestamp to the data
+        prediction_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Save to file
+        with open(filename, 'w') as f:
+            json.dump(prediction_data, f, indent=4)
+            
+        # Also save to CSV
+        save_to_csv(prediction_data)
+            
+        print(f"Prediction saved to {filename}")
+        return True
+    except Exception as e:
+        print(f"Error saving prediction: {e}")
+        return False
+
+@app.route('/update_actual_score', methods=['POST'])
+def update_actual_score():
+    try:
+        # Get prediction ID and actual score from form
+        prediction_id = request.form.get('prediction_id')
+        actual_score = int(request.form.get('actual_score'))
+        match_result = request.form.get('match_result')  # Win or Loss
+        
+        if not prediction_id:
+            return jsonify({'error': 'Prediction ID is required'}), 400
+            
+        # Load the prediction from CSV
+        csv_file = 'data/ipl_results.csv'
+        
+        if not os.path.exists(csv_file):
+            return jsonify({'error': 'Prediction records not found'}), 404
+            
+        # Read CSV into DataFrame
+        df = pd.read_csv(csv_file)
+        
+        # Find the row with matching prediction_id
+        if 'prediction_id' in df.columns and prediction_id in df['prediction_id'].values:
+            idx = df[df['prediction_id'] == prediction_id].index[0]
+            
+            # Update values
+            df.at[idx, 'actual_score'] = actual_score
+            df.at[idx, 'match_result'] = match_result
+            
+            # Calculate prediction accuracy
+            predicted_score = df.at[idx, 'predicted_score']
+            if predicted_score > 0:
+                # Calculate accuracy as percentage (100 - percentage difference)
+                score_diff = abs(predicted_score - actual_score)
+                accuracy = max(0, 100 - (score_diff / predicted_score * 100))
+                df.at[idx, 'prediction_accuracy'] = round(accuracy, 1)
+            
+            # Write back to CSV
+            df.to_csv(csv_file, index=False)
+            
+            # Also save to JSON file for individual prediction
+            prediction_data = df.loc[idx].to_dict()
+            
+            # Create predictions directory if it doesn't exist
+            os.makedirs('data/predictions', exist_ok=True)
+            
+            # Save to JSON file
+            prediction_file = f"data/predictions/prediction_{prediction_id}.json"
+            with open(prediction_file, 'w') as f:
+                json.dump(prediction_data, f, indent=4)
+            
+            return jsonify({'success': True, 'message': 'Actual score updated successfully'})
+        else:
+            return jsonify({'error': 'Prediction not found'}), 404
+            
+    except Exception as e:
+        print(f"Error updating actual score: {e}")
+        return jsonify({'error': str(e)}), 500
+
+def update_csv_with_actual(prediction_id, actual_score, match_result, accuracy):
+    try:
+        csv_file = 'data/ipl_results.csv'
+        
+        # Check if file exists
+        if not os.path.isfile(csv_file):
+            return False
+            
+        # Read CSV into DataFrame
+        df = pd.read_csv(csv_file)
+        
+        # Find the row with matching prediction_id
+        if 'prediction_id' in df.columns and prediction_id in df['prediction_id'].values:
+            idx = df[df['prediction_id'] == prediction_id].index[0]
+            df.at[idx, 'actual_score'] = actual_score
+            df.at[idx, 'match_result'] = match_result
+            df.at[idx, 'prediction_accuracy'] = accuracy
+            
+            # Write back to CSV
+            df.to_csv(csv_file, index=False)
+            return True
+        
+        return False
+    except Exception as e:
+        print(f"Error updating CSV: {e}")
+        return False
+
+# Then keep your predict route as is
 @app.route('/predict', methods=['POST'])
 def predict():
     if request.method == 'POST':
@@ -621,7 +752,6 @@ def test_result():
     bowling_team = "Chennai Super Kings"
     batting_team_logo = url_for('static', filename=team_logos.get(batting_team, ''))
     bowling_team_logo = url_for('static', filename=team_logos.get(bowling_team, ''))
-    
     # Get team statistics
     batting_stats, bowling_stats, h2h_stats = get_team_stats(batting_team, bowling_team)
     
@@ -645,116 +775,10 @@ def test_result():
                           bowling_stats=bowling_stats,
                           h2h_stats=h2h_stats)
 
+# At the end of your app.py file, modify the run statement
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     # Set debug based on environment
     debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
 
-# Function to save prediction history
-def save_prediction(prediction_data):
-    try:
-        # Create a unique filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"data/predictions/prediction_{timestamp}.json"
-        
-        # Add timestamp to the data
-        prediction_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Save to file
-        with open(filename, 'w') as f:
-            json.dump(prediction_data, f, indent=4)
-            
-        # Also save to CSV
-        save_to_csv(prediction_data)
-            
-        print(f"Prediction saved to {filename}")
-        return True
-    except Exception as e:
-        print(f"Error saving prediction: {e}")
-        return False
-
-@app.route('/update_actual_score', methods=['POST'])
-def update_actual_score():
-    try:
-        # Get prediction ID and actual score from form
-        prediction_id = request.form.get('prediction_id')
-        actual_score = int(request.form.get('actual_score'))
-        match_result = request.form.get('match_result')  # Win or Loss
-        
-        if not prediction_id:
-            return jsonify({'error': 'Prediction ID is required'}), 400
-            
-        # Load the prediction from CSV
-        csv_file = 'data/ipl_results.csv'
-        
-        if not os.path.exists(csv_file):
-            return jsonify({'error': 'Prediction records not found'}), 404
-            
-        # Read CSV into DataFrame
-        df = pd.read_csv(csv_file)
-        
-        # Find the row with matching prediction_id
-        if 'prediction_id' in df.columns and prediction_id in df['prediction_id'].values:
-            idx = df[df['prediction_id'] == prediction_id].index[0]
-            
-            # Update values
-            df.at[idx, 'actual_score'] = actual_score
-            df.at[idx, 'match_result'] = match_result
-            
-            # Calculate prediction accuracy
-            predicted_score = df.at[idx, 'predicted_score']
-            if predicted_score > 0:
-                # Calculate accuracy as percentage (100 - percentage difference)
-                score_diff = abs(predicted_score - actual_score)
-                accuracy = max(0, 100 - (score_diff / predicted_score * 100))
-                df.at[idx, 'prediction_accuracy'] = round(accuracy, 1)
-            
-            # Write back to CSV
-            df.to_csv(csv_file, index=False)
-            
-            # Also save to JSON file for individual prediction
-            prediction_data = df.loc[idx].to_dict()
-            
-            # Create predictions directory if it doesn't exist
-            os.makedirs('data/predictions', exist_ok=True)
-            
-            # Save to JSON file
-            prediction_file = f"data/predictions/prediction_{prediction_id}.json"
-            with open(prediction_file, 'w') as f:
-                json.dump(prediction_data, f, indent=4)
-            
-            return jsonify({'success': True, 'message': 'Actual score updated successfully'})
-        else:
-            return jsonify({'error': 'Prediction not found'}), 404
-            
-    except Exception as e:
-        print(f"Error updating actual score: {e}")
-        return jsonify({'error': str(e)}), 500
-
-def update_csv_with_actual(prediction_id, actual_score, match_result, accuracy):
-    try:
-        csv_file = 'data/ipl_results.csv'
-        
-        # Check if file exists
-        if not os.path.isfile(csv_file):
-            return False
-            
-        # Read CSV into DataFrame
-        df = pd.read_csv(csv_file)
-        
-        # Find the row with matching prediction_id
-        if 'prediction_id' in df.columns and prediction_id in df['prediction_id'].values:
-            idx = df[df['prediction_id'] == prediction_id].index[0]
-            df.at[idx, 'actual_score'] = actual_score
-            df.at[idx, 'match_result'] = match_result
-            df.at[idx, 'prediction_accuracy'] = accuracy
-            
-            # Write back to CSV
-            df.to_csv(csv_file, index=False)
-            return True
-        
-        return False
-    except Exception as e:
-        print(f"Error updating CSV: {e}")
-        return False

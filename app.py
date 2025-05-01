@@ -5,17 +5,8 @@ import pickle
 import joblib
 import os
 import json
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from xgboost import XGBRegressor
-import warnings
 from datetime import datetime
-import math
-import re
+import warnings
 
 # Suppress warnings
 warnings.filterwarnings('ignore')
@@ -25,8 +16,12 @@ app.secret_key = 'ipl_score_predictor_secret_key'
 
 # Load the models
 try:
-    score_model = joblib.load('ipl-score-predictor\models\ipl_score_model.pkl')
-    with open('models/pipe.pkl', 'rb') as f:
+    # Fix the path - use os.path.join for cross-platform compatibility
+    score_model_path = os.path.join('models', 'ipl_score_model.pkl')
+    win_model_path = os.path.join('models', 'pipe.pkl')
+    
+    score_model = joblib.load(score_model_path)
+    with open(win_model_path, 'rb') as f:
         win_model = pickle.load(f)
     print("Models loaded successfully!")
 except Exception as e:
@@ -91,8 +86,7 @@ team_colors = {
     'Lucknow Super Giants': '#A72056'
 }
 
-# Create a directory to store prediction history
-# Ensure necessary directories exist
+# Create necessary directories
 os.makedirs('Datasets', exist_ok=True)
 os.makedirs('models', exist_ok=True)
 os.makedirs('data/predictions', exist_ok=True)
@@ -108,7 +102,7 @@ def analyze_head_to_head(team1, team2):
         # Try to load the dataset
         try:
             # Fix the path - use forward slashes for cross-platform compatibility
-            ipl_data = pd.read_csv('Datasets/ipl_matches.csv')
+            ipl_data = pd.read_csv(os.path.join('Datasets', 'ipl_matches.csv'))
         except FileNotFoundError:
             # Create dummy data if file doesn't exist
             print("Match data file not found. Creating dummy data for head-to-head analysis.")
@@ -124,7 +118,7 @@ def analyze_head_to_head(team1, team2):
                 })
             ipl_data = pd.DataFrame(matches)
             os.makedirs('Datasets', exist_ok=True)
-            ipl_data.to_csv('Datasets/ipl_matches.csv', index=False)
+            ipl_data.to_csv(os.path.join('Datasets', 'ipl_matches.csv'), index=False)
         
         # Filter matches between these two teams - simplify the filtering logic
         h2h_matches = ipl_data[
@@ -174,7 +168,7 @@ def get_team_stats(team1, team2):
     try:
         # Try to load the dataset
         try:
-            ipl_data = pd.read_csv('Datasets/ipl_matches.csv')
+            ipl_data = pd.read_csv(os.path.join('Datasets', 'ipl_matches.csv'))
         except FileNotFoundError:
             # If file doesn't exist, create a dummy dataset for demonstration
             print("Match data file not found. Creating dummy data.")
@@ -193,7 +187,7 @@ def get_team_stats(team1, team2):
             ipl_data = pd.DataFrame(matches)
             # Save the dummy data for future use
             os.makedirs('Datasets', exist_ok=True)
-            ipl_data.to_csv('Datasets/ipl_matches.csv', index=False)
+            ipl_data.to_csv(os.path.join('Datasets', 'ipl_matches.csv'), index=False)
         
         # Get team1 stats
         team1_matches = ipl_data[(ipl_data['team1'] == team1) | (ipl_data['team2'] == team1)]
@@ -241,16 +235,16 @@ def get_team_stats(team1, team2):
             'team2_wins': 0, 
             'team1_win_percentage': 0, 
             'team2_win_percentage': 0,
-            'team1_name': team1,  # Add team names to default h2h stats
-            'team2_name': team2   # Add team names to default h2h stats
+            'team1_name': team1,
+            'team2_name': team2
         }
         return default_stats, default_stats, default_h2h
 
 # Function to save prediction to CSV
-def save_prediction(data):
+def save_to_csv(data):
     try:
         # Create the file path
-        file_path = 'data/ipl_results.csv'
+        file_path = os.path.join('data', 'ipl_results.csv')
         
         # Generate a prediction ID
         prediction_id = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -296,8 +290,8 @@ def get_last_five_overs_stats(team1, team2):
     try:
         # Try to load the dataset
         try:
-            deliveries = pd.read_csv('Datasets/deliveries.csv')
-            matches = pd.read_csv('Datasets/matches.csv')
+            deliveries = pd.read_csv(os.path.join('Datasets', 'deliveries.csv'))
+            matches = pd.read_csv(os.path.join('Datasets', 'matches.csv'))
         except FileNotFoundError:
             # Return default values if file doesn't exist
             return {
@@ -602,7 +596,7 @@ def prediction_history():
     """View prediction history"""
     try:
         predictions = []
-        history_dir = 'data/predictions'
+        history_dir = os.path.join('data', 'predictions')
         if os.path.exists(history_dir):
             for filename in os.listdir(history_dir):
                 if filename.endswith('.json'):

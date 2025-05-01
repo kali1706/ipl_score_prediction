@@ -646,15 +646,10 @@ def test_result():
                           h2h_stats=h2h_stats)
 
 if __name__ == '__main__':
-    # Create directories for models and data if they don't exist
-    os.makedirs('models', exist_ok=True)
-    os.makedirs('data', exist_ok=True)
-    
-    # Check if models exist, if not run data_processing.py
-    if not os.path.exists('models/ipl_score_model.pkl') or not os.path.exists('models/pipe.pkl'):
-        print("Models not found. Please run data_processing.py first.")
-    
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    # Set debug based on environment
+    debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
 
 # Function to save prediction history
 def save_prediction(prediction_data):
